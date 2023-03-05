@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  server:
+    container_name: rusty-server
+    build:
+      context: ./
+    env_file:
+      - ./.env
+    environment:
+      PORT: 7878
+      DATABASE_URL: postgresql://postgres:postgres@database:5432/postgres?schema=public
+      SUPERTOKENS_URL: "http://supertokens:3567"
+    ports:
+      - 7878:7878
+    depends_on:
+      - database
+    restart: always
+
+  # https://hub.docker.com/_/postgres
+  database:
+    container_name: rusty-database
+    image: postgres:15-alpine
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - 5432:5432
+    restart: always
+
+  # See https://supertokens.com/docs/thirdparty/custom-ui/init/database-setup/postgresql
+  supertokens:
+    container_name: rusty-supertokens
+    image: registry.supertokens.io/supertokens/supertokens-postgresql
+    env_file:
+      - ./.env
+    environment:
+      SUPERTOKENS_PORT: 3567
+      POSTGRESQL_CONNECTION_URI: "postgresql://supertokens:supertokens@database:5432/supertokens?schema=public"
+    ports:
+      - 3567:3567
+    depends_on:
+      - database
+    restart: unless-stopped

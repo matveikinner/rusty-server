@@ -1,0 +1,6 @@
+{
+  // Editor
+  "editor.formatOnSave": true,
+  "editor.rulers": [80, 120],
+  "editor.inlayHints.enabled": "on"
+}
